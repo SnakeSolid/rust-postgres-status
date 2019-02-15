@@ -1,0 +1,20 @@
+[package]
+name = "postgres-status"
+version = "0.1.0"
+authors = ["Anton Shabanov <snakesolid@ngs.ru>"]
+edition = "2018"
+
+[dependencies]
+env_logger = "0.5"
+iron = "0.6"
+log = "0.4"
+mount = "0.4"
+postgres = "0.15"
+router = "0.6"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+serde_yaml = "0.8"
+staticfile = "0.5"
+structopt = "0.2"
+time = "0.1"

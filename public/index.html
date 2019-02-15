@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>PostgreSQL Status</title>
+
+    <link rel="icon" sizes="16x16" type="image/x-icon" href="/static/favicon-x16.png" />
+    <link rel="icon" sizes="32x32" type="image/x-icon" href="/static/favicon-x32.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css"
+      integrity="sha256-ncjDAd2/rm/vaNTqp7Kk96MfSeHACtbiDU9NWKqNuCI="
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/modal.min.css"
+      integrity="sha256-FccLM5cr47C+SE7Xjvlw+IQGY/xmreJ8yTIEwqA6OXs="
+      crossorigin="anonymous"
+    />
+
+    <script
+      async
+      data-main="/static/js/init.js"
+      src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"
+      integrity="sha256-1fEPhSsRKlFKGfK3eO710tEweHh1fwokU5wFGDHO+vg="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="ui grid">
+      <div class="two wide column"></div>
+
+      <div class="twelve wide column">
+        <div class="ui secondary pointing menu">
+          <div class="header item">PostgreSQL Status</div>
+        </div>
+
+        <button class="fluid ui blue button" data-bind="click: updateState">Update</button>
+
+        <div class="ui progress success">
+          <div class="bar" data-bind="style: progressStyle">
+            <div class="progress"></div>
+          </div>
+
+          <div class="label">Server disk space <span>3 TiB</span> out of <span>5.7 TiB</span> is <span data-bint="text: loadPercent"></span>%.</div>
+        </div>
+
+        <table class="ui selectable striped compact padded table" data-bind="visible: hasResults">
+          <thead>
+            <tr>
+              <th class="ten wide">Database</th>
+              <th class="two wide">Size</th>
+              <th class="four wide">Modified</th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: databases">
+            <tr>
+              <td data-bind="text: name"></td>
+              <td class="right aligned" data-bind="text: sizeHuman"></td>
+              <td class="right aligned">
+                <span data-bind="text: modifiedFormat"></span> 
+                (<span data-bind="text: modifiedFromNow"></span>)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="two wide column"></div>
+    </div>
+  </body>
+</html>
