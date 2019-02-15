@@ -41,8 +41,8 @@
           <div class="bar" data-bind="style: progressStyle"><div class="progress"></div></div>
 
           <div class="label">
-            Server disk space <span>3 TiB</span> out of <span>5.7 TiB</span> is
-            <span data-bint="text: loadPercent"></span>%.
+            Server disk space <span data-bind="text: diskUsedHuman"></span> GiB out of
+            <span data-bind="text: diskCapacityHuman"></span> GiB (<span data-bind="text: loadPercent"></span>%).
           </div>
         </div>
 

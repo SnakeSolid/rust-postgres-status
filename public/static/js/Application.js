@@ -11,6 +11,14 @@ define(["knockout", "reqwest", "moment", "Database"], function(ko, reqwest, mome
 		this.isError = ko.observable(false);
 		this.errorMessage = ko.observable();
 
+		this.diskUsedHuman = ko.pureComputed(function() {
+			return (this.diskUsed() / (1024 * 1024 * 1024)).toFixed(1);
+		}, this);
+
+		this.diskCapacityHuman = ko.pureComputed(function() {
+			return (this.diskCapacity() / (1024 * 1024 * 1024)).toFixed(1);
+		}, this);
+
 		this.loadPercent = ko.pureComputed(function() {
 			return (100.0 * this.diskUsed()) / this.diskCapacity();
 		}, this);
