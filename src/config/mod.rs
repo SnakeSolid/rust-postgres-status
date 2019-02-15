@@ -38,7 +38,7 @@ pub struct ServerConfig {
     port: u16,
     role: String,
     password: String,
-    keep_database: HashSet<String>,
+    service_databases: HashSet<String>,
     disk: DiskConfig,
 }
 
@@ -63,29 +63,34 @@ impl ServerConfig {
         &self.password
     }
 
-    pub fn keep_database(&self) -> &HashSet<String> {
-        &self.keep_database
+    pub fn service_databases(&self) -> &HashSet<String> {
+        &self.service_databases
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DiskConfig {
+    offset: u64,
+    capacity: u64,
     soft_threshold: u64,
     hard_threshold: u64,
-    capacity: u64,
 }
 
 impl DiskConfig {
+    pub fn offset(&self) -> u64 {
+        self.offset
+    }
+
+    pub fn capacity(&self) -> u64 {
+        self.capacity
+    }
+
     pub fn soft_threshold(&self) -> u64 {
         self.soft_threshold
     }
 
     pub fn hard_threshold(&self) -> u64 {
         self.hard_threshold
-    }
-
-    pub fn capacity(&self) -> u64 {
-        self.capacity
     }
 }
 

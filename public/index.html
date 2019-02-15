@@ -37,25 +37,25 @@
 
         <button class="fluid ui blue button" data-bind="click: updateState">Update</button>
 
-        <div class="ui progress success">
+        <div class="ui progress" data-bind="css: progressState">
           <div class="bar" data-bind="style: progressStyle"><div class="progress"></div></div>
 
           <div class="label">
-            Server disk space <span data-bind="text: diskUsedHuman"></span> GiB out of
-            <span data-bind="text: diskCapacityHuman"></span> GiB (<span data-bind="text: loadPercent"></span>%).
+            Server disk space <span data-bind="text: diskUsedHuman"></span> out of
+            <span data-bind="text: diskCapacityHuman"></span> (<span data-bind="text: loadPercentHuman"></span>%).
           </div>
         </div>
 
-        <table class="ui selectable striped compact padded table" data-bind="visible: hasResults">
+        <table class="ui sortable selectable striped compact padded table" data-bind="visible: hasResults">
           <thead>
             <tr>
-              <th class="ten wide">Database</th>
-              <th class="two wide">Size</th>
-              <th class="four wide">Modified</th>
+              <th class="ten wide" data-bind="click: sortByName, css: cssForName">Database</th>
+              <th class="two wide" data-bind="click: sortBySize, css: cssForSize">Size</th>
+              <th class="four wide" data-bind="click: sortByModified, css: cssForModified">Modified</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: databases">
-            <tr>
+            <tr data-bind="css: { disabled: service }">
               <td data-bind="text: name"></td>
               <td class="right aligned" data-bind="text: sizeHuman"></td>
               <td class="right aligned">

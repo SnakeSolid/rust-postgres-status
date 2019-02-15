@@ -1,26 +1,82 @@
 "use strict";
 
-define(["knockout", "reqwest", "moment", "Database"], function(ko, reqwest, moment, Database) {
+define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwest, moment, Database, Util) {
+	const SORT_NAME = "SortName";
+	const SORT_SIZE = "SortSize";
+	const SORT_MODIFIED = "SortModified";
+
+	const ORDER_ASC = "OrderAsc";
+	const ORDER_DESC = "OrderDesc";
+
 	const Application = function() {
 		this.diskUsed = ko.observable(0.0);
 		this.diskCapacity = ko.observable(0.0);
 		this.softThreshold = ko.observable(0.0);
 		this.hardThreshold = ko.observable(0.0);
+		this.sortColumn = ko.observable(SORT_MODIFIED);
+		this.sortOrder = ko.observable(ORDER_ASC);
 		this.databases = ko.observableArray([]);
 		this.isLoading = ko.observable(false);
 		this.isError = ko.observable(false);
 		this.errorMessage = ko.observable();
 
+		this.progressState = ko.pureComputed(function() {
+			const result = {};
+
+			result["success"] = this.diskUsed() < this.softThreshold();
+			result["warning"] = this.diskUsed() >= this.softThreshold() && this.diskUsed() < this.hardThreshold();
+			result["error"] = this.diskUsed() >= this.hardThreshold();
+
+			return result;
+		}, this);
+
+		this.cssForName = ko.pureComputed(function() {
+			const isColumnMatches = this.sortColumn() === SORT_NAME;
+			const result = {};
+
+			result["sorted"] = isColumnMatches;
+			result["ascending"] = isColumnMatches && this.sortOrder() === ORDER_ASC;
+			result["descending"] = isColumnMatches && this.sortOrder() === ORDER_DESC;
+
+			return result;
+		}, this);
+
+		this.cssForSize = ko.pureComputed(function() {
+			const isColumnMatches = this.sortColumn() === SORT_SIZE;
+			const result = {};
+
+			result["sorted"] = isColumnMatches;
+			result["ascending"] = isColumnMatches && this.sortOrder() === ORDER_ASC;
+			result["descending"] = isColumnMatches && this.sortOrder() === ORDER_DESC;
+
+			return result;
+		}, this);
+
+		this.cssForModified = ko.pureComputed(function() {
+			const isColumnMatches = this.sortColumn() === SORT_MODIFIED;
+			const result = {};
+
+			result["sorted"] = isColumnMatches;
+			result["ascending"] = isColumnMatches && this.sortOrder() === ORDER_ASC;
+			result["descending"] = isColumnMatches && this.sortOrder() === ORDER_DESC;
+
+			return result;
+		}, this);
+
 		this.diskUsedHuman = ko.pureComputed(function() {
-			return (this.diskUsed() / (1024 * 1024 * 1024)).toFixed(1);
+			return Util.humanSize(this.diskUsed());
 		}, this);
 
 		this.diskCapacityHuman = ko.pureComputed(function() {
-			return (this.diskCapacity() / (1024 * 1024 * 1024)).toFixed(1);
+			return Util.humanSize(this.diskCapacity());
 		}, this);
 
 		this.loadPercent = ko.pureComputed(function() {
 			return (100.0 * this.diskUsed()) / this.diskCapacity();
+		}, this);
+
+		this.loadPercentHuman = ko.pureComputed(function() {
+			return this.loadPercent().toFixed(0);
 		}, this);
 
 		this.progressStyle = ko.pureComputed(function() {
@@ -36,6 +92,50 @@ define(["knockout", "reqwest", "moment", "Database"], function(ko, reqwest, mome
 		this.updateState();
 	};
 
+	Application.prototype.updateSortHeader = function(sortField) {
+		if (this.sortColumn() !== sortField) {
+			this.sortColumn(sortField);
+			this.sortOrder(ORDER_DESC);
+		} else if (this.sortOrder() === ORDER_ASC) {
+			this.sortOrder(ORDER_DESC);
+		} else if (this.sortOrder() === ORDER_DESC) {
+			this.sortOrder(ORDER_ASC);
+		}
+	};
+
+	Application.prototype.sortDatabases = function(sortField) {
+		let sortOrder;
+
+		if (this.sortOrder() == ORDER_DESC) {
+			sortOrder = 1;
+		} else {
+			sortOrder = -1;
+		}
+
+		if (this.sortColumn() == SORT_NAME) {
+			this.databases.sort(Util.sortBy("name", sortOrder));
+		} else if (this.sortColumn() == SORT_SIZE) {
+			this.databases.sort(Util.sortBy("size", sortOrder));
+		} else if (this.sortColumn() == SORT_MODIFIED) {
+			this.databases.sort(Util.sortBy("modified", sortOrder));
+		}
+	};
+
+	Application.prototype.sortByName = function() {
+		this.updateSortHeader(SORT_NAME);
+		this.sortDatabases();
+	};
+
+	Application.prototype.sortBySize = function() {
+		this.updateSortHeader(SORT_SIZE);
+		this.sortDatabases();
+	};
+
+	Application.prototype.sortByModified = function() {
+		this.updateSortHeader(SORT_MODIFIED);
+		this.sortDatabases();
+	};
+
 	Application.prototype.updateState = function() {
 		const self = this;
 		const res = reqwest({
@@ -46,23 +146,16 @@ define(["knockout", "reqwest", "moment", "Database"], function(ko, reqwest, mome
 			.then(
 				function(resp) {
 					if (resp.success) {
-						const databases = resp.result.databases
-							.map(function(database) {
-								return new Database(database);
-							})
-							.sort(function(a, b) {
-								return b.modified() - a.modified();
-							});
-
-						this.diskUsed(
-							resp.result.databases.reduce(function(a, b) {
-								return a.size + b.size;
-							}, 0.0)
-						);
+						this.diskUsed(resp.result.disk_used);
 						this.diskCapacity(resp.result.disk_capacity);
 						this.softThreshold(resp.result.soft_threshold);
 						this.hardThreshold(resp.result.hard_threshold);
-						this.databases(databases);
+						this.databases(
+							resp.result.databases.map(function(database) {
+								return new Database(database);
+							})
+						);
+						this.sortDatabases();
 					} else {
 						this.isError(true);
 						this.errorMessage(resp.message);
