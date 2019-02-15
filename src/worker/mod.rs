@@ -27,9 +27,7 @@ impl Worker {
         loop {
             info!("Start query databases");
 
-            for server in self.config.servers() {
-                self.query_databases(server);
-            }
+            self.query_databases(self.config.server());
 
             info!("Query complete");
 

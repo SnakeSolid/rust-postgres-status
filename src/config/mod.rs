@@ -14,7 +14,7 @@ pub type ConfigRef = Arc<Config>;
 #[derive(Debug, Deserialize)]
 pub struct Config {
     update_interval: u64,
-    servers: Vec<ServerConfig>,
+    server: ServerConfig,
     users: Vec<UserConfig>,
 }
 
@@ -23,8 +23,8 @@ impl Config {
         self.update_interval
     }
 
-    pub fn servers(&self) -> &[ServerConfig] {
-        &self.servers
+    pub fn server(&self) -> &ServerConfig {
+        &self.server
     }
 
     pub fn users(&self) -> &[UserConfig] {
@@ -34,27 +34,17 @@ impl Config {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ServerConfig {
-    disk_capacity: u64,
-    soft_threshold: u64,
-    hard_threshold: u64,
     host: String,
     port: u16,
     role: String,
     password: String,
     keep_database: HashSet<String>,
+    disk: DiskConfig,
 }
 
 impl ServerConfig {
-    pub fn disk_capacity(&self) -> u64 {
-        self.disk_capacity
-    }
-
-    pub fn soft_threshold(&self) -> u64 {
-        self.soft_threshold
-    }
-
-    pub fn hard_threshold(&self) -> u64 {
-        self.hard_threshold
+    pub fn disk(&self) -> &DiskConfig {
+        &self.disk
     }
 
     pub fn host(&self) -> &str {
@@ -75,6 +65,27 @@ impl ServerConfig {
 
     pub fn keep_database(&self) -> &HashSet<String> {
         &self.keep_database
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct DiskConfig {
+    soft_threshold: u64,
+    hard_threshold: u64,
+    capacity: u64,
+}
+
+impl DiskConfig {
+    pub fn soft_threshold(&self) -> u64 {
+        self.soft_threshold
+    }
+
+    pub fn hard_threshold(&self) -> u64 {
+        self.hard_threshold
+    }
+
+    pub fn capacity(&self) -> u64 {
+        self.capacity
     }
 }
 

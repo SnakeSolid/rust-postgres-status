@@ -22,11 +22,6 @@ impl StateHandler {
 impl Handler for StateHandler {
     fn handle(&self, _request: &mut IronRequest) -> IronResult<IronResponse> {
         handle_empty(move || {
-            let server = &self
-                .config
-                .servers()
-                .get(0)
-                .ok_or_else(|| HandlerError::new("Server not found"))?;
             let mut databases: Vec<DatabaseData> = Vec::new();
 
             self.state
@@ -39,10 +34,12 @@ impl Handler for StateHandler {
                 })
                 .map_err(|_| HandlerError::new("State error"))?;
 
+            let disk = self.config.server().disk();
+
             Ok(Response::new(
-                server.disk_capacity(),
-                server.soft_threshold(),
-                server.hard_threshold(),
+                disk.capacity(),
+                disk.soft_threshold(),
+                disk.hard_threshold(),
                 databases,
             ))
         })
