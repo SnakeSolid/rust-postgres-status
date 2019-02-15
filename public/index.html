@@ -33,18 +33,17 @@
       <div class="two wide column"></div>
 
       <div class="twelve wide column">
-        <div class="ui secondary pointing menu">
-          <div class="header item">PostgreSQL Status</div>
-        </div>
+        <div class="ui secondary pointing menu"><div class="header item">PostgreSQL Status</div></div>
 
         <button class="fluid ui blue button" data-bind="click: updateState">Update</button>
 
         <div class="ui progress success">
-          <div class="bar" data-bind="style: progressStyle">
-            <div class="progress"></div>
-          </div>
+          <div class="bar" data-bind="style: progressStyle"><div class="progress"></div></div>
 
-          <div class="label">Server disk space <span>3 TiB</span> out of <span>5.7 TiB</span> is <span data-bint="text: loadPercent"></span>%.</div>
+          <div class="label">
+            Server disk space <span>3 TiB</span> out of <span>5.7 TiB</span> is
+            <span data-bint="text: loadPercent"></span>%.
+          </div>
         </div>
 
         <table class="ui selectable striped compact padded table" data-bind="visible: hasResults">
@@ -60,8 +59,7 @@
               <td data-bind="text: name"></td>
               <td class="right aligned" data-bind="text: sizeHuman"></td>
               <td class="right aligned">
-                <span data-bind="text: modifiedFormat"></span> 
-                (<span data-bind="text: modifiedFromNow"></span>)
+                <span data-bind="text: modifiedFormat"></span> (<span data-bind="text: modifiedFromNow"></span>)
               </td>
             </tr>
           </tbody>

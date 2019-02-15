@@ -7,13 +7,13 @@ define(["knockout", "moment"], function(ko, moment) {
 		this.size = ko.observable(params["size"]);
 
 		this.sizeHuman = ko.pureComputed(function() {
-			const factors = [ "B","KiB","MiB","GiB","TiB" ];
+			const factors = ["B", "KiB", "MiB", "GiB", "TiB"];
 			let size = this.size();
 			let index = 0;
 
 			while (size > 1024 && index < factors.length) {
 				size /= 1024;
-				index += 1; 
+				index += 1;
 			}
 
 			return size.toFixed(1) + " " + factors[index];

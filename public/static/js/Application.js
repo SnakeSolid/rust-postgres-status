@@ -12,12 +12,12 @@ define(["knockout", "reqwest", "moment", "Database"], function(ko, reqwest, mome
 		this.errorMessage = ko.observable();
 
 		this.loadPercent = ko.pureComputed(function() {
-			return 100.0 * this.diskUsed() / this.diskCapacity();
+			return (100.0 * this.diskUsed()) / this.diskCapacity();
 		}, this);
 
 		this.progressStyle = ko.pureComputed(function() {
 			return {
-				"width": this.loadPercent().toFixed(0) + "%",
+				width: this.loadPercent().toFixed(0) + "%",
 			};
 		}, this);
 
@@ -38,15 +38,19 @@ define(["knockout", "reqwest", "moment", "Database"], function(ko, reqwest, mome
 			.then(
 				function(resp) {
 					if (resp.success) {
-						const databases = resp.result.databases.map(function (database) {
-							return new Database(database);
-						}).sort(function(a, b) {
-							return b.modified() - a.modified();
-						});
+						const databases = resp.result.databases
+							.map(function(database) {
+								return new Database(database);
+							})
+							.sort(function(a, b) {
+								return b.modified() - a.modified();
+							});
 
-						this.diskUsed(resp.result.databases.reduce(function(a, b) {
-							return a.size + b.size;
-						}, 0.0));
+						this.diskUsed(
+							resp.result.databases.reduce(function(a, b) {
+								return a.size + b.size;
+							}, 0.0)
+						);
 						this.diskCapacity(resp.result.disk_capacity);
 						this.softThreshold(resp.result.soft_threshold);
 						this.hardThreshold(resp.result.hard_threshold);
