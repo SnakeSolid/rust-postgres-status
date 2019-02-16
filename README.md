@@ -1,4 +1,4 @@
-# PgRestore Status
+# PostgreSQL Status
 
 Tool to monitor PostgreSQL database creation dates and size.
 
