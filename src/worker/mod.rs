@@ -1,10 +1,12 @@
+mod error;
 mod postgres;
 
+pub use self::error::WorkerError;
+pub use self::error::WorkerResult;
 pub use self::postgres::DatabaseError;
 pub use self::postgres::PostgreSQL;
 
 use crate::config::ConfigRef;
-use crate::config::ServerConfig;
 use crate::state::StateRef;
 use std::thread;
 use std::thread::Builder;
@@ -27,36 +29,43 @@ impl Worker {
         loop {
             info!("Start query databases");
 
-            self.query_databases(self.config.server());
+            if let Err(err) = update_databases(&self.config, &self.state) {
+                warn!("Update database error: {}", err);
+            }
 
             info!("Query complete");
 
             thread::sleep(Duration::from_secs(interval));
         }
     }
+}
 
-    fn query_databases(&self, server: &ServerConfig) {
-        let postgres = PostgreSQL::new(
-            server.host(),
-            server.port(),
-            server.role(),
-            server.password(),
-        );
+/// Update state to match all databases in query. This function will block callee until all databases updated.
+///
+/// If some error occurred content of state is not defined.
+pub fn update_databases(config: &ConfigRef, state: &StateRef) -> WorkerResult<()> {
+    let server_config = config.server();
+    let postgres = PostgreSQL::new(
+        server_config.host(),
+        server_config.port(),
+        server_config.role(),
+        server_config.password(),
+    );
 
-        match postgres.database_list(|name, modified, size| DatabaseInfo::new(name, modified, size))
-        {
-            Ok(infos) => {
-                self.state.clear().unwrap();
+    match postgres.database_list(|name, modified, size| DatabaseInfo::new(name, modified, size)) {
+        Ok(infos) => {
+            state.clear().map_err(WorkerError::state_error)?;
 
-                for info in infos {
-                    self.state
-                        .put(&info.name, info.modified, info.size)
-                        .unwrap();
-                }
+            for info in infos {
+                state
+                    .put(&info.name, info.modified, info.size)
+                    .map_err(WorkerError::state_error)?;
             }
-            Err(err) => warn!("Failed to retain old paths - {}", err),
         }
+        Err(err) => warn!("Failed to retain old paths - {}", err),
     }
+
+    Ok(())
 }
 
 pub fn start(config: ConfigRef, state: StateRef) {

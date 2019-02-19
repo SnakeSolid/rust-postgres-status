@@ -29,7 +29,17 @@
       <div class="twelve wide column">
         <div class="ui secondary pointing menu"><div class="header item">PostgreSQL Status</div></div>
 
-        <button class="fluid ui blue button" data-bind="click: updateState">Update</button>
+        <button
+          class="fluid ui blue button"
+          data-bind="click: forceUpdate, css: { loading: isLoading, disabled: isLoading }"
+        >
+          Force Update
+        </button>
+
+        <div class="ui error message" data-bind="visible: isError">
+          <div class="header">Error occurred</div>
+          <p data-bind="text: errorMessage"></p>
+        </div>
 
         <div class="ui progress" data-bind="css: progressState">
           <div class="bar" data-bind="style: progressStyle"><div class="progress"></div></div>

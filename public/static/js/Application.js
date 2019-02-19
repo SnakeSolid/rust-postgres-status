@@ -20,6 +20,10 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 		this.isError = ko.observable(false);
 		this.errorMessage = ko.observable();
 
+		this.isSuccess = ko.pureComputed(function() {
+			return !this.isError();
+		}, this);
+
 		this.progressState = ko.pureComputed(function() {
 			const result = {};
 
@@ -136,6 +140,38 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 		this.sortDatabases();
 	};
 
+	Application.prototype.forceUpdate = function() {
+		const self = this;
+		const res = reqwest({
+			url: "/api/v1/update",
+			type: "json",
+			method: "POST",
+		})
+			.then(
+				function(resp) {
+					if (resp.success) {
+						this.updateState();
+					} else {
+						this.isError(true);
+						this.errorMessage(resp.message);
+					}
+
+					this.isLoading(false);
+				}.bind(this)
+			)
+			.fail(
+				function(err, msg) {
+					this.isLoading(false);
+					this.isError(true);
+					this.errorMessage(msg || err.responseText);
+				}.bind(this)
+			);
+
+		this.isLoading(true);
+		this.isError(false);
+		this.errorMessage("");
+	};
+
 	Application.prototype.updateState = function() {
 		const self = this;
 		const res = reqwest({
@@ -172,7 +208,7 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 				}.bind(this)
 			);
 
-		this.isLoading(false);
+		this.isLoading(true);
 		this.isError(false);
 		this.errorMessage("");
 	};

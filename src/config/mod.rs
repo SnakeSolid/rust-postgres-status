@@ -96,12 +96,17 @@ impl DiskConfig {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct UserConfig {
-    name: String,
+    login: String,
+    name: Option<String>,
     mail: Option<String>,
 }
 
 impl UserConfig {
-    pub fn name(&self) -> &str {
+    pub fn login(&self) -> &str {
+        self.login.as_ref()
+    }
+
+    pub fn name(&self) -> Option<&String> {
         self.name.as_ref()
     }
 

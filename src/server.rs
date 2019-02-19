@@ -1,5 +1,6 @@
 use crate::config::ConfigRef;
 use crate::handler::StateHandler;
+use crate::handler::UpdateHandler;
 use crate::options::Options;
 use crate::state::StateRef;
 use iron::Iron;
@@ -12,6 +13,10 @@ pub fn start(options: &Options, config: ConfigRef, state: StateRef) {
     mount.mount(
         "/api/v1/state",
         StateHandler::new(config.clone(), state.clone()),
+    );
+    mount.mount(
+        "/api/v1/update",
+        UpdateHandler::new(config.clone(), state.clone()),
     );
     mount.mount("/static", Static::new("public/static"));
     mount.mount("/", Static::new("public"));
