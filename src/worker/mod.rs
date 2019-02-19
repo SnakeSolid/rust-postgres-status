@@ -45,6 +45,11 @@ impl Worker {
 /// If some error occurred content of state is not defined.
 pub fn update_databases(config: &ConfigRef, state: &StateRef) -> WorkerResult<()> {
     let server_config = config.server();
+    let all_users: Vec<_> = config
+        .users()
+        .iter()
+        .map(|user| user.login().to_lowercase())
+        .collect();
     let postgres = PostgreSQL::new(
         server_config.host(),
         server_config.port(),
@@ -57,8 +62,13 @@ pub fn update_databases(config: &ConfigRef, state: &StateRef) -> WorkerResult<()
             state.clear().map_err(WorkerError::state_error)?;
 
             for info in infos {
+                let database_name = info.name.to_lowercase();
+                let user = all_users
+                    .iter()
+                    .find(|&login| database_name.contains(login));
+
                 state
-                    .put(&info.name, info.modified, info.size)
+                    .put(&info.name, user, info.modified, info.size)
                     .map_err(WorkerError::state_error)?;
             }
         }

@@ -29,6 +29,7 @@ impl Handler for StateHandler {
                 .for_each(|database| {
                     databases.push(DatabaseData::new(
                         database.name(),
+                        database.user(),
                         database.modified(),
                         database.size(),
                         service_databases.contains(database.name()),
@@ -80,15 +81,23 @@ impl Response {
 #[derive(Debug, Serialize)]
 struct DatabaseData {
     name: String,
+    user: Option<String>,
     modified: i64,
     size: u64,
     service: bool,
 }
 
 impl DatabaseData {
-    fn new(name: &str, modified: i64, size: u64, service: bool) -> DatabaseData {
+    fn new(
+        name: &str,
+        user: Option<&String>,
+        modified: i64,
+        size: u64,
+        service: bool,
+    ) -> DatabaseData {
         DatabaseData {
             name: name.into(),
+            user: user.cloned(),
             modified,
             size,
             service,

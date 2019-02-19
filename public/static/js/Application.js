@@ -2,6 +2,7 @@
 
 define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwest, moment, Database, Util) {
 	const SORT_NAME = "SortName";
+	const SORT_USER = "SortUser";
 	const SORT_SIZE = "SortSize";
 	const SORT_MODIFIED = "SortModified";
 
@@ -36,6 +37,17 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 
 		this.cssForName = ko.pureComputed(function() {
 			const isColumnMatches = this.sortColumn() === SORT_NAME;
+			const result = {};
+
+			result["sorted"] = isColumnMatches;
+			result["ascending"] = isColumnMatches && this.sortOrder() === ORDER_ASC;
+			result["descending"] = isColumnMatches && this.sortOrder() === ORDER_DESC;
+
+			return result;
+		}, this);
+
+		this.cssForUser = ko.pureComputed(function() {
+			const isColumnMatches = this.sortColumn() === SORT_USER;
 			const result = {};
 
 			result["sorted"] = isColumnMatches;
@@ -118,6 +130,8 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 
 		if (this.sortColumn() == SORT_NAME) {
 			this.databases.sort(Util.sortBy("name", sortOrder));
+		} else if (this.sortColumn() == SORT_USER) {
+			this.databases.sort(Util.sortBy("user", sortOrder));
 		} else if (this.sortColumn() == SORT_SIZE) {
 			this.databases.sort(Util.sortBy("size", sortOrder));
 		} else if (this.sortColumn() == SORT_MODIFIED) {
@@ -127,6 +141,11 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 
 	Application.prototype.sortByName = function() {
 		this.updateSortHeader(SORT_NAME);
+		this.sortDatabases();
+	};
+
+	Application.prototype.sortByUser = function() {
+		this.updateSortHeader(SORT_USER);
 		this.sortDatabases();
 	};
 

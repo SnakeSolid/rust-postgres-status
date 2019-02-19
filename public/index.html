@@ -53,7 +53,8 @@
         <table class="ui sortable selectable striped compact padded table" data-bind="visible: hasResults">
           <thead>
             <tr>
-              <th class="ten wide" data-bind="click: sortByName, css: cssForName">Database</th>
+              <th class="eight wide" data-bind="click: sortByName, css: cssForName">Database</th>
+              <th class="two wide" data-bind="click: sortByUser, css: cssForUser">User</th>
               <th class="two wide" data-bind="click: sortBySize, css: cssForSize">Size</th>
               <th class="four wide" data-bind="click: sortByModified, css: cssForModified">Modified</th>
             </tr>
@@ -61,6 +62,7 @@
           <tbody data-bind="foreach: databases">
             <tr data-bind="css: { disabled: service }">
               <td data-bind="text: name"></td>
+              <td data-bind="text: user"></td>
               <td class="right aligned" data-bind="text: sizeHuman"></td>
               <td class="right aligned">
                 <span data-bind="text: modifiedFormat"></span> (<span data-bind="text: modifiedFromNow"></span>)

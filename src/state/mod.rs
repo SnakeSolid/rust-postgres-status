@@ -54,8 +54,14 @@ impl StateRef {
         })
     }
 
-    pub fn put(&self, name: &str, modified: i64, size: u64) -> StateResult<()> {
-        self.with_write(move |state| Ok(state.put(name, modified, size)))
+    pub fn put(
+        &self,
+        name: &str,
+        user: Option<&String>,
+        modified: i64,
+        size: u64,
+    ) -> StateResult<()> {
+        self.with_write(move |state| Ok(state.put(name, user, modified, size)))
     }
 
     pub fn clear(&self) -> StateResult<()> {
@@ -85,8 +91,8 @@ impl State {
         }
     }
 
-    fn put(&mut self, name: &str, modified: i64, size: u64) {
-        let database = Database::new(name, modified, size);
+    fn put(&mut self, name: &str, user: Option<&String>, modified: i64, size: u64) {
+        let database = Database::new(name, user, modified, size);
 
         self.databases.insert(name.into(), database);
     }

@@ -4,6 +4,7 @@ define(["knockout", "moment", "Util"], function(ko, moment, Util) {
 	const Database = function(params) {
 		this.service = ko.observable(params["service"]);
 		this.name = ko.observable(params["name"]);
+		this.user = ko.observable(params["user"] || "");
 		this.modified = ko.observable(params["modified"]);
 		this.size = ko.observable(params["size"]);
 
