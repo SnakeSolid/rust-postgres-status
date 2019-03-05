@@ -48,6 +48,23 @@ impl PostgreSQL {
         Ok(result)
     }
 
+    pub fn drop_database(&self, database_name: &str) -> DatabaseResult<()> {
+        let connection = self.connect()?;
+
+        connection
+            .execute(include_str!("teminate_backends.sql"), &[&database_name])
+            .map_err(DatabaseError::query_execution_error)?;
+
+        connection
+            .execute(
+                &format!("drop database \"{}\"", database_name.replace("\"", "\"\"")),
+                &[],
+            )
+            .map_err(DatabaseError::query_execution_error)?;
+
+        Ok(())
+    }
+
     fn connect(&self) -> DatabaseResult<Connection> {
         let password = Some(self.password.as_str()).filter(|w| !w.is_empty());
         let params = ConnectParams::builder()

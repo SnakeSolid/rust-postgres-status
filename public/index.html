@@ -60,8 +60,16 @@
             </tr>
           </thead>
           <tbody data-bind="foreach: databases">
-            <tr data-bind="css: { disabled: service }">
-              <td data-bind="text: name"></td>
+            <tr data-bind="css: { disabled: isService }">
+              <td>
+                <span data-bind="text: name"></span> &emsp;
+                <button
+                  class="ui negative compact mini icon button"
+                  data-bind="visible: isNotService, click: $parent.dropDatabase"
+                >
+                  <i class="delete icon"></i> Drop
+                </button>
+              </td>
               <td data-bind="text: user"></td>
               <td class="right aligned" data-bind="text: sizeHuman"></td>
               <td class="right aligned">

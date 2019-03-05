@@ -8,6 +8,14 @@ define(["knockout", "moment", "Util"], function(ko, moment, Util) {
 		this.modified = ko.observable(params["modified"]);
 		this.size = ko.observable(params["size"]);
 
+		this.isService = ko.pureComputed(function() {
+			return this.service();
+		}, this);
+
+		this.isNotService = ko.pureComputed(function() {
+			return !this.service();
+		}, this);
+
 		this.sizeHuman = ko.pureComputed(function() {
 			return Util.humanSize(this.size());
 		}, this);

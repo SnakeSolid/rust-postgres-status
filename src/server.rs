@@ -1,4 +1,5 @@
 use crate::config::ConfigRef;
+use crate::handler::DropDbHandler;
 use crate::handler::StateHandler;
 use crate::handler::UpdateHandler;
 use crate::options::Options;
@@ -18,6 +19,7 @@ pub fn start(options: &Options, config: ConfigRef, state: StateRef) {
         "/api/v1/update",
         UpdateHandler::new(config.clone(), state.clone()),
     );
+    mount.mount("/api/v1/dropdb", DropDbHandler::new(config.clone()));
     mount.mount("/static", Static::new("public/static"));
     mount.mount("/", Static::new("public"));
 

@@ -78,6 +78,25 @@ pub fn update_databases(config: &ConfigRef, state: &StateRef) -> WorkerResult<()
     Ok(())
 }
 
+/// Update state to match all databases in query. This function will block callee until all databases updated.
+///
+/// If some error occurred content of state is not defined.
+pub fn drop_database(config: &ConfigRef, name: &str) -> WorkerResult<()> {
+    let server_config = config.server();
+    let postgres = PostgreSQL::new(
+        server_config.host(),
+        server_config.port(),
+        server_config.role(),
+        server_config.password(),
+    );
+
+    if let Err(err) = postgres.drop_database(name) {
+        warn!("Failed to drop database - {}", err);
+    }
+
+    Ok(())
+}
+
 pub fn start(config: ConfigRef, state: StateRef) {
     if let Err(err) = Builder::new()
         .name("state worker".to_string())

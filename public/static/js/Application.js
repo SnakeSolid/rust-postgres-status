@@ -105,6 +105,41 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 			return this.databases().length > 0;
 		}, this);
 
+		this.dropDatabase = function(database) {
+			reqwest({
+				url: "/api/v1/dropdb",
+				type: "json",
+				method: "POST",
+				contentType: "application/json",
+				data: JSON.stringify({
+					name: database.name(),
+				}),
+			})
+				.then(
+					function(resp) {
+						if (resp.success) {
+							this.databases.remove(database);
+						} else {
+							this.isError(true);
+							this.errorMessage(resp.message);
+						}
+
+						this.isLoading(false);
+					}.bind(this)
+				)
+				.fail(
+					function(err, msg) {
+						this.isLoading(false);
+						this.isError(true);
+						this.errorMessage(msg || err.responseText);
+					}.bind(this)
+				);
+
+			this.isLoading(true);
+			this.isError(false);
+			this.errorMessage("");
+		}.bind(this);
+
 		this.updateState();
 	};
 
@@ -160,8 +195,7 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 	};
 
 	Application.prototype.forceUpdate = function() {
-		const self = this;
-		const res = reqwest({
+		reqwest({
 			url: "/api/v1/update",
 			type: "json",
 			method: "POST",
@@ -192,8 +226,7 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 	};
 
 	Application.prototype.updateState = function() {
-		const self = this;
-		const res = reqwest({
+		reqwest({
 			url: "/api/v1/state",
 			type: "json",
 			method: "POST",
