@@ -125,6 +125,7 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 						function(resp) {
 							if (resp.success) {
 								this.databases.remove(database);
+								this.diskUsed(this.diskUsed() - database.size());
 							} else {
 								this.isError(true);
 								this.errorMessage(resp.message);
