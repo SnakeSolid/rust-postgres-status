@@ -8,6 +8,7 @@ mod config;
 mod error;
 mod handler;
 mod options;
+mod postgres;
 mod server;
 mod state;
 mod worker;

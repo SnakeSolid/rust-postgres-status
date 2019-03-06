@@ -1,7 +1,7 @@
 use super::util::handle_request;
 use super::HandlerError;
 use crate::config::ConfigRef;
-use crate::worker;
+use crate::postgres::PostgreSQL;
 use iron::middleware::Handler;
 use iron::IronResult;
 use iron::Request as IronRequest;
@@ -21,8 +21,18 @@ impl DropDbHandler {
 impl Handler for DropDbHandler {
     fn handle(&self, request: &mut IronRequest) -> IronResult<IronResponse> {
         handle_request(request, move |request: Request| {
-            worker::drop_database(&self.config, &request.name)
-                .map_err(|err| HandlerError::new(&format!("{}", err)))
+            let name = request.name;
+            let server_config = self.config.server();
+            let postgres = PostgreSQL::new(
+                server_config.host(),
+                server_config.port(),
+                server_config.role(),
+                server_config.password(),
+            );
+
+            postgres.drop_database(&name).map_err(|err| {
+                HandlerError::new(&format!("Failed to drop database `{}` - {}", name, err))
+            })
         })
     }
 }

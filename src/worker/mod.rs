@@ -1,12 +1,10 @@
 mod error;
-mod postgres;
 
 pub use self::error::WorkerError;
 pub use self::error::WorkerResult;
-pub use self::postgres::DatabaseError;
-pub use self::postgres::PostgreSQL;
 
 use crate::config::ConfigRef;
+use crate::postgres::PostgreSQL;
 use crate::state::StateRef;
 use std::thread;
 use std::thread::Builder;
@@ -73,25 +71,6 @@ pub fn update_databases(config: &ConfigRef, state: &StateRef) -> WorkerResult<()
             }
         }
         Err(err) => warn!("Failed to retain old paths - {}", err),
-    }
-
-    Ok(())
-}
-
-/// Update state to match all databases in query. This function will block callee until all databases updated.
-///
-/// If some error occurred content of state is not defined.
-pub fn drop_database(config: &ConfigRef, name: &str) -> WorkerResult<()> {
-    let server_config = config.server();
-    let postgres = PostgreSQL::new(
-        server_config.host(),
-        server_config.port(),
-        server_config.role(),
-        server_config.password(),
-    );
-
-    if let Err(err) = postgres.drop_database(name) {
-        warn!("Failed to drop database - {}", err);
     }
 
     Ok(())
