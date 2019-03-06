@@ -106,38 +106,45 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 		}, this);
 
 		this.dropDatabase = function(database) {
-			reqwest({
-				url: "/api/v1/dropdb",
-				type: "json",
-				method: "POST",
-				contentType: "application/json",
-				data: JSON.stringify({
-					name: database.name(),
-				}),
-			})
-				.then(
-					function(resp) {
-						if (resp.success) {
-							this.databases.remove(database);
-						} else {
+			const name = database.name();
+			const confirmed = window.confirm(
+				"Database `" + name + "` will be dropped. All active connections will be closed. Are you sure?"
+			);
+
+			if (confirmed) {
+				reqwest({
+					url: "/api/v1/dropdb",
+					type: "json",
+					method: "POST",
+					contentType: "application/json",
+					data: JSON.stringify({
+						name: name,
+					}),
+				})
+					.then(
+						function(resp) {
+							if (resp.success) {
+								this.databases.remove(database);
+							} else {
+								this.isError(true);
+								this.errorMessage(resp.message);
+							}
+
+							this.isLoading(false);
+						}.bind(this)
+					)
+					.fail(
+						function(err, msg) {
+							this.isLoading(false);
 							this.isError(true);
-							this.errorMessage(resp.message);
-						}
+							this.errorMessage(msg || err.responseText);
+						}.bind(this)
+					);
 
-						this.isLoading(false);
-					}.bind(this)
-				)
-				.fail(
-					function(err, msg) {
-						this.isLoading(false);
-						this.isError(true);
-						this.errorMessage(msg || err.responseText);
-					}.bind(this)
-				);
-
-			this.isLoading(true);
-			this.isError(false);
-			this.errorMessage("");
+				this.isLoading(true);
+				this.isError(false);
+				this.errorMessage("");
+			}
 		}.bind(this);
 
 		this.updateState();
