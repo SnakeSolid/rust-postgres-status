@@ -1,6 +1,7 @@
 use super::util::handle_empty;
 use super::HandlerError;
 use crate::config::ConfigRef;
+use crate::config::DiskConfig;
 use crate::state::StateRef;
 use iron::middleware::Handler;
 use iron::IronResult;
@@ -37,8 +38,14 @@ impl Handler for StateHandler {
                 })
                 .map_err(|_| HandlerError::new("State error"))?;
 
-            let disk = self.config.server().disk();
-            let used: u64 = databases.iter().map(|d| d.size).sum();
+            let disk = self
+                .state
+                .disk_state()
+                .map_err(|_| HandlerError::new("State error"))?;
+            let used: u64 = match self.config.server().disk() {
+                DiskConfig::Fixed { .. } => databases.iter().map(|d| d.size).sum(),
+                DiskConfig::Command { .. } => 0,
+            };
 
             Ok(Response::new(
                 disk.offset() + used,

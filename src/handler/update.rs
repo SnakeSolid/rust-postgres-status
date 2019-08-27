@@ -23,6 +23,8 @@ impl UpdateHandler {
 impl Handler for UpdateHandler {
     fn handle(&self, _request: &mut IronRequest) -> IronResult<IronResponse> {
         handle_empty(move || {
+            worker::update_disk(&self.config, &self.state)
+                .map_err(|err| HandlerError::new(&format!("{}", err)))?;
             worker::update_databases(&self.config, &self.state)
                 .map_err(|err| HandlerError::new(&format!("{}", err)))
         })

@@ -1,14 +1,26 @@
 use super::ConfigError;
 use super::ConfigRef;
 use super::ConfigResult;
+use super::DiskConfig;
 use std::collections::HashSet;
 
 #[allow(clippy::needless_pass_by_value)]
 pub fn validate(config: ConfigRef) -> ConfigResult<()> {
     validate_number(config.update_interval(), "update_interval")?;
-    validate_number(config.server().disk().capacity(), "capacity")?;
-    validate_number(config.server().disk().soft_threshold(), "soft_threshold")?;
-    validate_number(config.server().disk().hard_threshold(), "hard_threshold")?;
+
+    match config.server().disk() {
+        DiskConfig::Fixed {
+            capacity,
+            soft_threshold,
+            hard_threshold,
+            ..
+        } => {
+            validate_number(*capacity, "capacity")?;
+            validate_number(*soft_threshold, "soft_threshold")?;
+            validate_number(*hard_threshold, "hard_threshold")?;
+        }
+        DiskConfig::Command { .. } => {}
+    }
 
     let mut logins = HashSet::new();
 

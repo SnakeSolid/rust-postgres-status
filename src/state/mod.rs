@@ -43,6 +43,24 @@ impl StateRef {
         }
     }
 
+    pub fn disk_state(&self) -> StateResult<DiskState> {
+        self.with_read(move |state| Ok(state.disk_state()))
+    }
+
+    pub fn set_disk_state(
+        &self,
+        offset: u64,
+        capacity: u64,
+        soft_threshold: u64,
+        hard_threshold: u64,
+    ) -> StateResult<()> {
+        self.with_write(move |state| {
+            state.set_disk_state(offset, capacity, soft_threshold, hard_threshold);
+
+            Ok(())
+        })
+    }
+
     pub fn for_each<F>(&self, callback: F) -> StateResult<()>
     where
         F: FnMut(&Database),
@@ -69,9 +87,47 @@ impl StateRef {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct DiskState {
+    offset: u64,
+    capacity: u64,
+    soft_threshold: u64,
+    hard_threshold: u64,
+}
+
+impl DiskState {
+    pub fn offset(&self) -> u64 {
+        self.offset
+    }
+
+    pub fn capacity(&self) -> u64 {
+        self.capacity
+    }
+
+    pub fn soft_threshold(&self) -> u64 {
+        self.soft_threshold
+    }
+
+    pub fn hard_threshold(&self) -> u64 {
+        self.hard_threshold
+    }
+}
+
+impl Default for DiskState {
+    fn default() -> Self {
+        DiskState {
+            offset: 0,
+            capacity: 0,
+            soft_threshold: 0,
+            hard_threshold: 0,
+        }
+    }
+}
+
 #[derive(Debug)]
 struct State {
     databases: HashMap<String, Database>,
+    disk_state: DiskState,
 }
 
 impl State {
@@ -79,7 +135,25 @@ impl State {
     fn new() -> State {
         State {
             databases: HashMap::new(),
+            disk_state: DiskState::default(),
         }
+    }
+
+    pub fn disk_state(&self) -> DiskState {
+        self.disk_state.clone()
+    }
+
+    pub fn set_disk_state(
+        &mut self,
+        offset: u64,
+        capacity: u64,
+        soft_threshold: u64,
+        hard_threshold: u64,
+    ) {
+        self.disk_state.offset = offset;
+        self.disk_state.capacity = capacity;
+        self.disk_state.soft_threshold = soft_threshold;
+        self.disk_state.hard_threshold = hard_threshold;
     }
 
     pub fn for_each<F>(&self, mut callback: F)

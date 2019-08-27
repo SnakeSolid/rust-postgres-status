@@ -69,49 +69,27 @@ impl ServerConfig {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct DiskConfig {
-    offset: u64,
-    capacity: u64,
-    soft_threshold: u64,
-    hard_threshold: u64,
-}
-
-impl DiskConfig {
-    pub fn offset(&self) -> u64 {
-        self.offset
-    }
-
-    pub fn capacity(&self) -> u64 {
-        self.capacity
-    }
-
-    pub fn soft_threshold(&self) -> u64 {
-        self.soft_threshold
-    }
-
-    pub fn hard_threshold(&self) -> u64 {
-        self.hard_threshold
-    }
+#[serde(untagged)]
+pub enum DiskConfig {
+    Fixed {
+        offset: u64,
+        capacity: u64,
+        soft_threshold: u64,
+        hard_threshold: u64,
+    },
+    Command {
+        command: String,
+    },
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct UserConfig {
     login: String,
-    name: Option<String>,
-    mail: Option<String>,
 }
 
 impl UserConfig {
     pub fn login(&self) -> &str {
         self.login.as_ref()
-    }
-
-    pub fn name(&self) -> Option<&String> {
-        self.name.as_ref()
-    }
-
-    pub fn mail(&self) -> Option<&String> {
-        self.mail.as_ref()
     }
 }
 
