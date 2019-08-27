@@ -88,7 +88,11 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 		}, this);
 
 		this.loadPercent = ko.pureComputed(function() {
-			return (100.0 * this.diskUsed()) / this.diskCapacity();
+			if (this.diskCapacity() > 0) {
+				return (100.0 * this.diskUsed()) / this.diskCapacity();
+			} else {
+				return 0;
+			}
 		}, this);
 
 		this.loadPercentHuman = ko.pureComputed(function() {
