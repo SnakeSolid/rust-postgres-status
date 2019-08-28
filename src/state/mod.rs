@@ -87,7 +87,7 @@ impl StateRef {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct DiskState {
     offset: u64,
     capacity: u64,
@@ -110,17 +110,6 @@ impl DiskState {
 
     pub fn hard_threshold(&self) -> u64 {
         self.hard_threshold
-    }
-}
-
-impl Default for DiskState {
-    fn default() -> Self {
-        DiskState {
-            offset: 0,
-            capacity: 0,
-            soft_threshold: 0,
-            hard_threshold: 0,
-        }
     }
 }
 
