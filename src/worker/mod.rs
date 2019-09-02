@@ -71,7 +71,7 @@ pub fn update_disk(config: &ConfigRef, state: &StateRef) -> WorkerResult<()> {
     let mut hard_threshold = 0;
 
     if let DiskConfig::Command { command } = config.server().disk() {
-        let child = Command::new(command)
+        let mut child = Command::new(command)
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
             .stderr(Stdio::null())
@@ -79,7 +79,7 @@ pub fn update_disk(config: &ConfigRef, state: &StateRef) -> WorkerResult<()> {
             .spawn()
             .map_err(WorkerError::io_error)?;
 
-        if let Some(mut stdout) = child.stdout {
+        if let Some(ref mut stdout) = child.stdout {
             let mut buffer = String::default();
 
             stdout
@@ -105,6 +105,8 @@ pub fn update_disk(config: &ConfigRef, state: &StateRef) -> WorkerResult<()> {
                 .map(|value| value.parse().unwrap_or(0))
                 .unwrap_or(0);
         }
+
+        child.wait().map_err(WorkerError::io_error)?;
     }
 
     state
