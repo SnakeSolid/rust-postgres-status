@@ -15,6 +15,7 @@ pub type ConfigRef = Arc<Config>;
 pub struct Config {
     update_interval: u64,
     server: ServerConfig,
+    cors: Option<Cors>,
     users: Vec<UserConfig>,
 }
 
@@ -25,6 +26,10 @@ impl Config {
 
     pub fn server(&self) -> &ServerConfig {
         &self.server
+    }
+
+    pub fn cors(&self) -> Option<&Cors> {
+        self.cors.as_ref()
     }
 
     pub fn users(&self) -> &[UserConfig] {
@@ -80,6 +85,13 @@ pub enum DiskConfig {
     Command {
         command: String,
     },
+}
+
+#[serde(tag = "type")]
+#[derive(Debug, Clone, Deserialize)]
+pub enum Cors {
+    AllowAny,
+    Whitelist { whitelist: HashSet<String> },
 }
 
 #[derive(Debug, Clone, Deserialize)]

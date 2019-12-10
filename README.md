@@ -51,4 +51,9 @@ server: # serve description
     - postgres
     - template0
     - template1
+
+cors:
+  type: Whitelist # use white list for CORS (another option AllowAny)
+  whitelist: # set of origins to allow access
+    - http://localhost:8080
 ```
