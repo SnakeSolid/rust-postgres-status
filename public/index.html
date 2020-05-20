@@ -29,9 +29,23 @@
       <div class="twelve wide column">
         <div class="ui secondary pointing menu"><div class="header item">PostgreSQL Status</div></div>
 
-        <button class="fluid ui blue button" data-bind="click: forceUpdate, css: { disabled: isLoading }">
-          Force Update
-        </button>
+        <div class="two ui buttons">
+          <button class="fluid ui primary button" data-bind="click: forceUpdate, css: { disabled: isLoading }">
+            Force Update
+          </button>
+          <button
+            class="fluid ui secondary button"
+            data-bind="click: toggleChart, enable: isChartAvailable, visible: isShowChartVisible, css: { disabled: isLoading }"
+          >
+            Show Chart
+          </button>
+          <button
+            class="fluid ui secondary button"
+            data-bind="click: toggleChart, enable: isChartAvailable, visible: isHideChartVisible, css: { disabled: isLoading }"
+          >
+            Hide Chart
+          </button>
+        </div>
 
         <div class="ui error message" data-bind="visible: isError">
           <div class="header">Error occurred</div>

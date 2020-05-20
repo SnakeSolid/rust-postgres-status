@@ -69,7 +69,8 @@ define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util
 		this.isLoading = ko.observable(false);
 		this.isError = ko.observable(false);
 		this.errorMessage = ko.observable();
-		this.isChartVisible = ko.observable(false);
+		this.isChartAvailable = ko.observable(false);
+		this.isChartRequired = ko.observable(true);
 
 		// Create Vega chart if it's possible.
 		this.chartView = null;
@@ -77,6 +78,18 @@ define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util
 
 		this.isSuccess = ko.pureComputed(function() {
 			return !this.isError();
+		}, this);
+
+		this.isChartVisible = ko.pureComputed(function() {
+			return this.isChartAvailable() && this.isChartRequired();
+		}, this);
+
+		this.isShowChartVisible = ko.pureComputed(function() {
+			return !this.isChartRequired();
+		}, this);
+
+		this.isHideChartVisible = ko.pureComputed(function() {
+			return this.isChartRequired();
 		}, this);
 
 		this.progressState = ko.pureComputed(function() {
@@ -292,6 +305,15 @@ define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util
 		this.errorMessage("");
 	};
 
+	Application.prototype.toggleChart = function() {
+		this.isChartRequired(!this.isChartRequired());
+
+		if (this.isChartVisible()) {
+			// Force to update chart.
+			window.dispatchEvent(new Event("resize"));
+		}
+	};
+
 	Application.prototype.updateChart = function() {
 		if (this.chartView === null) {
 			return;
@@ -315,7 +337,7 @@ define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util
 				.then(() => window.dispatchEvent(new Event("resize")));
 		}
 
-		this.isChartVisible(hasData);
+		this.isChartAvailable(hasData);
 	};
 
 	Application.prototype.updateState = function() {
