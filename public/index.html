@@ -47,7 +47,7 @@
           </div>
         </div>
 
-        <div data-bind="visible: isSuccess">
+        <div class="ui basic segment" data-bind="visible: isChartVisible, css: { loading: isLoading }">
           <div id="chart" style="width: 100%;"></div>
         </div>
 

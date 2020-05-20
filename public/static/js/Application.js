@@ -30,6 +30,9 @@ define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util
 				calculate: "datum.size / datum.total_size * 100",
 				as: "percent",
 			},
+			{
+				filter: "datum.percent > 1.0",
+			},
 		],
 		mark: "bar",
 		encoding: {
@@ -66,6 +69,7 @@ define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util
 		this.isLoading = ko.observable(false);
 		this.isError = ko.observable(false);
 		this.errorMessage = ko.observable();
+		this.isChartVisible = ko.observable(false);
 
 		// Create Vega chart if it's possible.
 		this.chartView = null;
@@ -180,6 +184,7 @@ define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util
 							if (resp.success) {
 								this.databases.remove(database);
 								this.diskUsed(this.diskUsed() - database.size());
+								this.updateChart();
 							} else {
 								this.isError(true);
 								this.errorMessage(resp.message);
@@ -295,16 +300,22 @@ define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util
 		const dataset = this.databases()
 			.filter(row => row.isNotService())
 			.map(row => ({ user: row.user(), size: row.size() }));
+		const hasData = dataset.length > 0;
 
-		this.chartView
-			.change(
-				"table",
-				vega
-					.changeset()
-					.remove(row => true)
-					.insert(dataset)
-			)
-			.run();
+		if (hasData) {
+			this.chartView
+				.change(
+					"table",
+					vega
+						.changeset()
+						.remove(row => true)
+						.insert(dataset)
+				)
+				.runAsync()
+				.then(() => window.dispatchEvent(new Event("resize")));
+		}
+
+		this.isChartVisible(hasData);
 	};
 
 	Application.prototype.updateState = function() {
