@@ -1,6 +1,52 @@
 "use strict";
 
-define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwest, moment, Database, Util) {
+define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util"], function(
+	ko,
+	reqwest,
+	moment,
+	vega,
+	VegaEmbed,
+	Database,
+	Util
+) {
+	const CHART_SCHEMA = {
+		$schema: "https://vega.github.io/schema/vega-lite/v4.json",
+		description: "A simple pie chart with labels.",
+		width: "container",
+		data: {
+			name: "table",
+			values: [{ user: "<undefined>", size: 0 }],
+		},
+		transform: [
+			{
+				aggregate: [{ op: "sum", field: "size", as: "size" }],
+				groupby: ["user"],
+			},
+			{
+				window: [{ op: "sum", field: "size", as: "total_size" }],
+				frame: [null, null],
+			},
+			{
+				calculate: "datum.size / datum.total_size * 100",
+				as: "percent",
+			},
+		],
+		mark: "bar",
+		encoding: {
+			y: {
+				field: "user",
+				type: "ordinal",
+				axis: { title: "User name" },
+				sort: "-x",
+			},
+			x: {
+				field: "percent",
+				type: "quantitative",
+				axis: { title: "Used database size (%)" },
+			},
+		},
+	};
+
 	const SORT_NAME = "SortName";
 	const SORT_USER = "SortUser";
 	const SORT_SIZE = "SortSize";
@@ -20,6 +66,10 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 		this.isLoading = ko.observable(false);
 		this.isError = ko.observable(false);
 		this.errorMessage = ko.observable();
+
+		// Create Vega chart if it's possible.
+		this.chartView = null;
+		this.chart = VegaEmbed("#chart", CHART_SCHEMA).then(res => (this.chartView = res.view));
 
 		this.isSuccess = ko.pureComputed(function() {
 			return !this.isError();
@@ -237,6 +287,26 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 		this.errorMessage("");
 	};
 
+	Application.prototype.updateChart = function() {
+		if (this.chartView === null) {
+			return;
+		}
+
+		const dataset = this.databases()
+			.filter(row => row.isNotService())
+			.map(row => ({ user: row.user(), size: row.size() }));
+
+		this.chartView
+			.change(
+				"table",
+				vega
+					.changeset()
+					.remove(row => true)
+					.insert(dataset)
+			)
+			.run();
+	};
+
 	Application.prototype.updateState = function() {
 		reqwest({
 			url: "/api/v1/state",
@@ -256,6 +326,7 @@ define(["knockout", "reqwest", "moment", "Database", "Util"], function(ko, reqwe
 							})
 						);
 						this.sortDatabases();
+						this.updateChart();
 					} else {
 						this.isError(true);
 						this.errorMessage(resp.message);

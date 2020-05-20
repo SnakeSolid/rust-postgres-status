@@ -47,6 +47,10 @@
           </div>
         </div>
 
+        <div data-bind="visible: isSuccess">
+          <div id="chart" style="width: 100%;"></div>
+        </div>
+
         <div class="ui vertical segment" data-bind="visible: hasResults, css: { loading: isLoading }">
           <table class="ui sortable selectable striped compact padded table">
             <thead>
