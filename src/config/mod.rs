@@ -87,8 +87,8 @@ pub enum DiskConfig {
     },
 }
 
-#[serde(tag = "type")]
 #[derive(Debug, Clone, Deserialize)]
+#[serde(tag = "type")]
 pub enum Cors {
     AllowAny,
     Whitelist { whitelist: HashSet<String> },

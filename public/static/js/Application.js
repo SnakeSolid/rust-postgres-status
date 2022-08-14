@@ -39,7 +39,7 @@ define(["knockout", "reqwest", "moment", "vega", "vega-embed", "Database", "Util
 			y: {
 				field: "user",
 				type: "ordinal",
-				axis: { title: "User name" },
+				axis: { title: "User name", labelFontSize: 14, "tickSize": 30, },
 				sort: "-x",
 			},
 			x: {

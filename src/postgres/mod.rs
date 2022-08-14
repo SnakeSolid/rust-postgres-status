@@ -2,11 +2,9 @@ mod error;
 
 pub use self::error::DatabaseError;
 pub use self::error::DatabaseResult;
-
-use postgres::params::ConnectParams;
-use postgres::params::Host;
-use postgres::Connection;
-use postgres::TlsMode;
+use postgres::config::SslMode;
+use postgres::Client;
+use postgres::NoTls;
 
 #[derive(Debug)]
 pub struct PostgreSQL {
@@ -30,7 +28,7 @@ impl PostgreSQL {
     where
         F: Fn(&str, i64, u64) -> T,
     {
-        let connection = self.connect()?;
+        let mut connection = self.connect()?;
         let mut result = Vec::new();
 
         for row in connection
@@ -49,7 +47,7 @@ impl PostgreSQL {
     }
 
     pub fn drop_database(&self, database_name: &str) -> DatabaseResult<()> {
-        let connection = self.connect()?;
+        let mut connection = self.connect()?;
 
         connection
             .execute(include_str!("teminate_backends.sql"), &[&database_name])
@@ -65,14 +63,15 @@ impl PostgreSQL {
         Ok(())
     }
 
-    fn connect(&self) -> DatabaseResult<Connection> {
-        let password = Some(self.password.as_str()).filter(|w| !w.is_empty());
-        let params = ConnectParams::builder()
+    fn connect(&self) -> DatabaseResult<Client> {
+        Client::configure()
+            .ssl_mode(SslMode::Disable)
+            .host(&self.server)
             .port(self.port)
-            .user(&self.user, password)
-            .database("postgres")
-            .build(Host::Tcp(self.server.clone()));
-
-        Connection::connect(params, TlsMode::None).map_err(DatabaseError::connection_error)
+            .user(&self.user)
+            .user(&self.password)
+            .dbname("postgres")
+            .connect(NoTls)
+            .map_err(DatabaseError::connection_error)
     }
 }
